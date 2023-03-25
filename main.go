@@ -12,6 +12,7 @@ import (
 	"net/http"
 	"os"
 	"time"
+	"strings"
 )
 
 type Word struct {
