@@ -80,7 +80,6 @@ func sendNotification(w http.ResponseWriter, r *http.Request) {
 		random := getRandomNumber(len(words))
 		message = fmt.Sprintf("%s- %s | %s | %s\n", message, words[random].Word, words[random].WordTR, words[random].Note)
 	}
-	fmt.Println(message)
 	requestData := fmt.Sprintf("{\"to\": \"/topics/vocabulary\",\"notification\": {\"title\": \"%s\",\"body\": \"%s\"}}", title, message)
 	var jsonStr = []byte(requestData)
 	req, err := http.NewRequest("POST", fcmUrl, bytes.NewBuffer(jsonStr))
