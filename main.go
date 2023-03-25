@@ -72,12 +72,13 @@ func sendNotification(w http.ResponseWriter, r *http.Request) {
 	fcmUrl := "https://fcm.googleapis.com/fcm/send"
 
 	fmt.Println("Notification is sending")
-	title := fmt.Sprintf("Vocabulary")
+	title := ""
 	message := ""
 	maxWord := 3
 	words := getAllUnknownWords()
 	for i := 0; i < maxWord; i++ {
 		random := getRandomNumber(len(words))
+		title = fmt.Sprintf("%s - %s", title, words[random].Word)
 		message = fmt.Sprintf("%s- %s | %s | %s\n", message, words[random].Word, words[random].WordTR, words[random].Note)
 	}
 	requestData := fmt.Sprintf("{\"to\": \"/topics/vocabulary\",\"notification\": {\"title\": \"%s\",\"body\": \"%s\"}}", title, message)
