@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -11,14 +12,16 @@ import (
 	"math/rand"
 	"net/http"
 	"os"
-	"time"
 	"strings"
+	"time"
 )
 
 type Word struct {
-	Word               string
-	WordTR             string
-	Note               string
+	Word       string
+	WordTR     string
+	Usage      string
+	Note       string
+	Definition string
 }
 
 var (
@@ -40,6 +43,7 @@ func main() {
 	listenAddr := os.Getenv("LISTEN_ADDR")
 	addr := listenAddr + `:` + os.Getenv("PORT")
 	http.HandleFunc("/send", sendNotification)
+	http.HandleFunc("/getwords", getWords)
 	log.Printf("starting server at %s", addr)
 	log.Fatal(http.ListenAndServe(addr, nil))
 }
@@ -80,7 +84,13 @@ func sendNotification(w http.ResponseWriter, r *http.Request) {
 	for i := 0; i < maxWord; i++ {
 		random := getRandomNumber(len(words))
 		title = fmt.Sprintf("%s - %s", title, words[random].Word)
-		message = fmt.Sprintf("%s- %s | %s | %s\n", message, words[random].Word, words[random].WordTR, words[random].Note)
+		note := ""
+		if words[random].Usage != "" {
+			note = words[random].Usage
+		} else {
+			note = words[random].Note
+		}
+		message = fmt.Sprintf("%s- %s | %s | %s\n", message, words[random].Word, words[random].WordTR, note)
 	}
 	requestData := fmt.Sprintf("{\"to\": \"/topics/vocabulary\",\"notification\": {\"title\": \"%s\",\"body\": \"%s\"}}", strings.ToUpper(title[2:]), message)
 	var jsonStr = []byte(requestData)
@@ -97,6 +107,25 @@ func sendNotification(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Println("Response Status:", resp.Status)
 
+}
+
+func getWords(w http.ResponseWriter, r *http.Request) {
+	var list [][]string
+	maxWord := 20
+	words := getAllUnknownWords()
+	for i := 0; i < maxWord; i++ {
+		random := getRandomNumber(len(words))
+		definition := ""
+		if words[random].Definition != "" {
+			definition = words[random].Definition
+		} else {
+			definition = words[random].WordTR
+		}
+		list = append(list, []string{words[random].Word, definition})
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(list)
 }
 
 func getRandomNumber(max int) int {
