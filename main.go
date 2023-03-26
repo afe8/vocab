@@ -122,7 +122,9 @@ func getWords(w http.ResponseWriter, r *http.Request) {
 			definition = words[random].WordTR
 		}
 		list = append(list, []string{words[random].Word, definition})
-	}
+	}7
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+        w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(list)
