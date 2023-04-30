@@ -114,8 +114,10 @@ func sendEmail(title, message string) {
 	if err = c.Auth(auth); err != nil {
 		println(err)
 	}
-	msg := fmt.Sprintf("Subject: %s\r\n\r\n"+
-		"%s\r\n", strings.ToUpper(title[2:]), message)
+	msg := fmt.Sprintf("From: Vocab <%s>\r\n"+
+		"To: %s\r\n"+
+		"Subject: %s\r\n\r\n"+
+		"%s\r\n", os.Getenv("MAIL_FROM"), os.Getenv("MAIL_TO"), strings.ToUpper(title[2:]), message)
 	mail := []byte(msg)
 
 	err = smtp.SendMail(smtpHost+":"+smtpPort, auth, from, to, mail)
